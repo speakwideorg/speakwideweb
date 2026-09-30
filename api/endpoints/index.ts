@@ -135,6 +135,10 @@ export const endpoints = {
     },
   },
 
+  referral: {
+    create: '/referral/create',
+  },
+
   cms: {
     areaOfExpertise: '/areaofexpertise/list',
     languageList: '/language/list',
