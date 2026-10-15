@@ -119,7 +119,17 @@ const validationSchema = yup.object({
       const isOnsite = selectedSession?.label?.toLowerCase()?.includes('site');
       const minimumEndTime = dayjs(startTime).add(isOnsite ? 2 : 0, 'hour');
 
-      if (!dayjs(value).isAfter(minimumEndTime)) {
+      // Onsite requires AT LEAST 2 hours, so exactly 2 hours must pass.
+      // isAfter is strictly exclusive and was rejecting it, meaning a session
+      // that could be booked (the create form uses MUI minTime, which is
+      // inclusive) could not then be edited.
+      // Non-onsite has no minimum duration, so the end must still be strictly
+      // after the start - a zero-length session is not valid.
+      const isTooShort = isOnsite
+        ? dayjs(value).isBefore(minimumEndTime)
+        : !dayjs(value).isAfter(dayjs(startTime));
+
+      if (isTooShort) {
         return this.createError({
           message: isOnsite
             ? 'End time must be at least 2 hours after start time for onsite sessions'
